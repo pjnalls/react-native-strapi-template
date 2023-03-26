@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cards",
+  "info": {
+    "singularName": "card",
+    "pluralName": "cards",
+    "displayName": "Card"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "front": {
+      "type": "string",
+      "required": true
+    },
+    "back": {
+      "type": "string",
+      "required": true
+    },
+    "days": {
+      "type": "integer"
+    }
+  }
+}
