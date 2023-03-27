@@ -10,21 +10,21 @@ import {
   DarkTheme,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as React from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { ColorSchemeName } from "react-native";
 
 import Colors from "../constants/Colors";
+import { CURRENT_API_TOKEN, IPV4_ADDRESS } from "../evironment.dev";
 import useColorScheme from "../hooks/useColorScheme";
+import LinkingConfiguration from "./LinkingConfiguration";
 import { ModalScreen } from "../screens/ModalScreen";
 import { NotFoundScreen } from "../screens/NotFoundScreen";
 import { DeckTabScreen } from "../screens/DeckTabScreen";
 import { QueueTabScreen } from "../screens/QueueTabScreen";
-import { RootStackParamList, RootTabParamList } from "../types";
-import LinkingConfiguration from "./LinkingConfiguration";
-import { decks } from "../data/Deck.data";
 import { TabBarIcon } from "../shared/TabBarIcon.util";
+import { Deck, RootStackParamList, RootTabParamList } from "../types";
 
-export const Navigation: React.FC<{
+export const Navigation: FC<{
   colorScheme: ColorSchemeName;
 }> = ({ colorScheme }: { colorScheme: ColorSchemeName }) => (
   <NavigationContainer
@@ -69,7 +69,38 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
-  const [deck, setDeck] = React.useState(decks[0]);
+  const [deck, setDeck] = useState({} as Deck);
+  const [decks, setDecks] = useState([] as Deck[]);
+  const getDecksForUser = useCallback(async () => {
+    const url = `http://${IPV4_ADDRESS}:1337/api/decks`;
+    // const jwt = store.getState().jwt;
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${CURRENT_API_TOKEN}`,
+      },
+    });
+
+    if (response.ok) {
+      const jsonValue = await response.json();
+      return Promise.resolve(jsonValue);
+    } else {
+      return Promise.reject("*** No decks found");
+    }
+  }, []);
+
+  useEffect(() => {
+    getDecksForUser().then((json) => {
+      json &&
+        setDecks([
+          ...json.data.map((d: any) => ({ ...d.attributes, id: d.id })),
+        ] as Deck[]);
+      setDeck(
+        [...json.data.map((d: any) => ({ ...d.attributes, id: d.id }))][0]
+      );
+    });
+  }, []);
 
   return (
     <BottomTab.Navigator
@@ -80,7 +111,7 @@ function BottomTabNavigator() {
     >
       <BottomTab.Screen
         name="Deck"
-        children={() => DeckTabScreen({ deck, setDeck })}
+        children={() => DeckTabScreen({ deck, decks, setDeck })}
         options={{
           title: "Decks",
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,

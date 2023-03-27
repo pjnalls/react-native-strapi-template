@@ -1,18 +1,51 @@
-import { FC, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Button, StyleSheet } from "react-native";
 
+import Colors from "../constants/Colors";
 import { ONE_DAY_IN_MILLISECONDS, system } from "../data/Queue.data";
+import { CURRENT_API_TOKEN, IPV4_ADDRESS } from "../evironment.dev";
 import { fibonacci } from "../fibonacci";
 import useColorScheme from "../hooks/useColorScheme";
 import { Text, View } from "./Themed";
 import { Card, QueueProps } from "../types";
-import Colors from "../constants/Colors";
 
-export const Review: FC<QueueProps> = (props: QueueProps) => {
-  const { queue } = props;
-  const [display, setDisplay] = useState(false);
+export const Review: FC<QueueProps> = (props) => {
+  const { deckId } = props;
+  const [queue, setQueue] = useState([] as Card[]);
   const [currentCard, setCurrentCard] = useState(queue[queue.length - 1]);
+  const [display, setDisplay] = useState(false);
   const colorScheme = useColorScheme();
+
+  const getCardsForUser = useCallback(async (deckId: number) => {
+    const url = `http://${IPV4_ADDRESS}:1337/api/cards?filters[$and][0][deckId][$eq]=${deckId}`;
+    // const jwt = store.getState().jwt;
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${CURRENT_API_TOKEN}`,
+      },
+    });
+
+    if (response.ok) {
+      const jsonValue = await response.json();
+      return Promise.resolve(jsonValue);
+    } else {
+      return Promise.reject("*** No cards found");
+    }
+  }, []);
+
+  useEffect(() => {
+    getCardsForUser(deckId).then((json) => {
+      json &&
+        setQueue([
+          ...json.data.map((d: any) => ({ ...d.attributes, id: d.id })),
+        ] as Card[]);
+      setCurrentCard(
+        [...json.data.map((d: any) => ({ ...d.attributes, id: d.id }))][0]
+      );
+    });
+  }, []);
 
   if (currentCard && currentCard.days <= 0) {
     const { front, back } = currentCard;
@@ -52,28 +85,52 @@ export const Review: FC<QueueProps> = (props: QueueProps) => {
                   color={Colors[colorScheme].easy}
                   title="Easy"
                   onPress={() =>
-                    review(5, currentCard, queue, setCurrentCard, setDisplay)
+                    review(
+                      5,
+                      currentCard,
+                      queue,
+                      () => setCurrentCard(queue[currentCard.id] as Card),
+                      setDisplay
+                    )
                   }
                 />
                 <Button
                   color={Colors[colorScheme].okay}
                   title="Okay"
                   onPress={() =>
-                    review(3, currentCard, queue, setCurrentCard, setDisplay)
+                    review(
+                      3,
+                      currentCard,
+                      queue,
+                      () => setCurrentCard(queue[currentCard.id] as Card),
+                      setDisplay
+                    )
                   }
                 />
                 <Button
                   color={Colors[colorScheme].hard}
                   title="Hard"
                   onPress={() =>
-                    review(1, currentCard, queue, setCurrentCard, setDisplay)
+                    review(
+                      1,
+                      currentCard,
+                      queue,
+                      () => setCurrentCard(queue[currentCard.id] as Card),
+                      setDisplay
+                    )
                   }
                 />
                 <Button
                   color={Colors[colorScheme].again}
                   title="Again"
                   onPress={() =>
-                    review(0, currentCard, queue, setCurrentCard, setDisplay)
+                    review(
+                      0,
+                      currentCard,
+                      queue,
+                      () => setCurrentCard(queue[currentCard.id] as Card),
+                      setDisplay
+                    )
                   }
                 />
               </View>
@@ -122,13 +179,13 @@ const review = (
   setCurrentCard: any,
   setDisplay: any
 ) => {
-  const currentIndex = queue.findIndex((card) => card._id === currentCard._id);
+  const currentIndex = queue.findIndex((card) => card.id === currentCard.id);
   const days = updateLastReviewedDate(currentIndex, queue);
 
   if (days <= 0) {
     setDays(n, currentIndex, queue);
     setDisplay(false);
-    setCurrentCard(() => queue[currentCard._id - 1]);
+    setCurrentCard(() => queue[currentCard.id - 1]);
   }
 };
 

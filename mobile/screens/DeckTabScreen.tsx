@@ -3,14 +3,13 @@ import { ScrollView } from "react-native";
 import { Decks } from "../components/Decks";
 import { Text, View } from "../components/Themed";
 import Colors from "../constants/Colors";
-import { decks } from "../data/Deck.data";
 import useColorScheme from "../hooks/useColorScheme";
 import { TabBarIcon } from "../shared/TabBarIcon.util";
 import { styles } from "../shared/Tab.styles";
 import { DeckTabProps } from "../types";
 
 export const DeckTabScreen: FC<DeckTabProps> = (props: DeckTabProps) => {
-  const { deck, setDeck } = props;
+  const { deck, decks, setDeck } = props;
   const colorScheme = useColorScheme();
   return (
     <View style={styles.container}>

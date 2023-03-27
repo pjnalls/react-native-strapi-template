@@ -11,18 +11,19 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 export type Card = {
-  _deckId: number;
-  _id: number;
+  deckId: number;
+  id: number;
   front: string;
   back: string;
   days: number;
 };
 
 export type Deck = {
-  _id: number;
-  name: string;
-  description: string;
+  id: number;
   cards: Card[];
+  description: string;
+  name: string;
+  user: User;
 };
 
 export type DecksProps = {
@@ -33,6 +34,7 @@ export type DecksProps = {
 
 export type DeckTabProps = {
   deck: Deck;
+  decks: Deck[];
   setDeck: React.Dispatch<React.SetStateAction<Deck>>;
 };
 
@@ -68,5 +70,10 @@ export type System = {
 };
 
 export type QueueProps = {
-  queue: Card[];
+  deckId: number;
 };
+
+export type User = {
+  id: string;
+  password: string;
+}

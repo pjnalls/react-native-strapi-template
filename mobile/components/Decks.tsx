@@ -1,11 +1,11 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-import { Deck, DecksProps } from "../types";
-import { Text, View } from "./Themed";
 import { TabBarIcon } from "../shared/TabBarIcon.util";
+import { Text, View } from "./Themed";
+import { Card, Deck, DecksProps } from "../types";
 
 export const Decks: FC<DecksProps> = (props: DecksProps) => {
   const { deck, decks, setDeck } = props;
@@ -19,13 +19,13 @@ export const Decks: FC<DecksProps> = (props: DecksProps) => {
         darkColor="rgba(255,255,255,0.1)"
       />
       {decks.map((d, index) => (
-        <View key={`deck-${d._id}`} style={styles.helpContainer}>
+        <View key={`deck-${d.id}`} style={styles.helpContainer}>
           <View style={{ marginRight: 17 }}>
             <TouchableOpacity onPress={() => handleDeckSelect(d, setDeck)}>
               <TabBarIcon
                 name="sticky-note"
                 color={
-                  deck._id === index
+                  deck.id === index + 1
                     ? Colors[colorScheme].tabIconSelected
                     : Colors[colorScheme].tabIconDefault
                 }
@@ -46,7 +46,7 @@ export const Decks: FC<DecksProps> = (props: DecksProps) => {
                 style={{
                   ...styles.itemTitle,
                   color:
-                    deck._id === index
+                    deck.id === index
                       ? Colors[colorScheme].tabIconSelected
                       : Colors[colorScheme].tabIconDefault,
                 }}

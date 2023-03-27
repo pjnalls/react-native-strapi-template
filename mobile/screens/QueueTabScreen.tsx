@@ -1,15 +1,14 @@
 import { FC } from "react";
 import { Review } from "../components/Review";
 import { Text, View } from "../components/Themed";
+import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 import { TabBarIcon } from "../shared/TabBarIcon.util";
 import { styles } from "../shared/Tab.styles";
 import { Card, Deck } from "../types";
-import Colors from "../constants/Colors";
 
 export const QueueTabScreen: FC<Deck> = (deck: Deck) => {
   const colorScheme = useColorScheme();
-  const queue: Card[] = deck.cards.filter((card) => card.days <= 0);
   return (
     <View style={styles.container}>
       <TabBarIcon
@@ -41,7 +40,7 @@ export const QueueTabScreen: FC<Deck> = (deck: Deck) => {
       >
         {deck.description}
       </Text>
-      <Review queue={queue} />
+      <Review deckId={deck.id} />
     </View>
   );
 };
